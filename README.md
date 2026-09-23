@@ -1,8 +1,8 @@
 # nightscout-go-systray
 
-A Linux system tray app to display live Nightscout CGM data.
-
 <img src="./screenshots/screenshot.png">
+
+A Linux system tray app to display live Nightscout CGM data.
 
 ## Dependencies
 
@@ -65,5 +65,7 @@ Name=Nightscout CGM
 Exec=/home/username/.local/bin/cgm -url https://your-nightscout-url.com
 Terminal=false
 ```
+
+## Screenshot menu dropdown
 
 <img src="./screenshots/screenshot_2.png">
