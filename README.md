@@ -14,10 +14,17 @@ sudo apt install libayatana-appindicator3-dev
 
 ```bash
 git clone https://github.com/harmen91/nightscout-go-systray
-cd nightscout-go-systray/nightscout-go-systray
+cd nightscout-go-systray
 go get -u ./...
 go build .
 cp cgm ~/.local/bin/
+```
+
+## Ensure the binary exists and has execute permissions:
+
+```bash
+ls -la ~/.local/bin/cgm
+chmod +x ~/.local/bin/cgm
 ```
 
 ## Usage
@@ -40,31 +47,20 @@ Example:
 cgm -url https://your-nightscout-url.com
 ```
 
-## Run in background
+## Create cgm.desktop and autostart on boot
 
-To run without a terminal, create a systemd user service:
-
-```bash
-mkdir -p ~/.config/systemd/user
-cat > ~/.config/systemd/user/cgm.service << EOF
-[Unit]
-Description=Nightscout CGM systray
-
-[Service]
-ExecStart=/home/$USER/.local/bin/cgm -url https://your-nightscout-url.com
-Restart=on-failure
-
-[Install]
-WantedBy=default.target
-EOF
-
-systemctl --user enable cgm
-systemctl --user start cgm
-```
-
-Check status:
 
 ```bash
-systemctl --user status cgm
+mkdir -p ~/.config/autostart
+nano ~/.config/autostart/cgm.desktop
 ```
 
+Change username and https://your-nightscout-url.com accordingly
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=Nightscout CGM
+Exec=/home/username/.local/bin/cgm -url https://your-nightscout-url.com
+Terminal=false
+```
