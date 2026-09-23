@@ -2,8 +2,6 @@
 
 A Linux system tray app to display live Nightscout CGM data.
 
-> Forked from [brettcodling/nightscout-go-systray](https://github.com/brettcodling/nightscout-go-systray) with bug fixes.
-
 ## Dependencies
 
 ```bash
