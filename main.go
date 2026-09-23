@@ -153,6 +153,7 @@ var (
 	lowTime     time.Time
 	previousBg  *systray.MenuItem
 	showBg      bool
+	showTimeAgo = true
 )
 
 func main() {
@@ -205,6 +206,7 @@ func main() {
 		refresh := systray.AddMenuItem("Refresh", "")
 		addAlertSettings(db)
 		showCurrent := systray.AddMenuItemCheckbox("Show current value", "", showBg)
+		showTimeAgo_item := systray.AddMenuItemCheckbox("Show time ago", "", showTimeAgo)
 		quit := systray.AddMenuItem("Quit", "")
 		go func() {
 			for {
@@ -217,6 +219,14 @@ func main() {
 					toggleShowCurrent(showCurrent, db)
 				case <-quit.ClickedCh:
 					systray.Quit()
+				case <-showTimeAgo_item.ClickedCh:
+					showTimeAgo = !showTimeAgo
+					if showTimeAgo {
+						showTimeAgo_item.Check()
+					} else {
+						showTimeAgo_item.Uncheck()
+					}
+					setBg()
 				}
 			}
 		}()
@@ -256,7 +266,11 @@ func (b *bg) alert() {
 }
 
 func (b *bg) format() string {
-	return fmt.Sprintf("%.1f %s", b.Value.Value, b.Direction.Value)
+    if showTimeAgo {
+        mins := int(time.Now().UnixMilli()-b.Value.Timestamp) / 60000
+        return fmt.Sprintf("%.1f %s %dm ago", b.Value.Value, b.Direction.Value, mins)
+    }
+    return fmt.Sprintf("%.1f %s", b.Value.Value, b.Direction.Value)
 }
 
 func (b *bg) getAlerts() (alerts []string) {
