@@ -17,6 +17,7 @@ git clone https://github.com/harmen91/nightscout-go-systray
 cd nightscout-go-systray
 go get -u ./...
 go build .
+mkdir -p ~/.local/bin
 cp cgm ~/.local/bin/
 ```
 
