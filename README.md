@@ -1,3 +1,5 @@
+<img src="./screenshots/screenshot_1.png">
+
 # nightscout-go-systray
 
 A Linux system tray app to display live Nightscout CGM data.
