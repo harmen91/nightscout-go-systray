@@ -6,6 +6,8 @@ A Linux system tray app to display live Nightscout CGM data.
 
 ## Dependencies
 
+- [Go](https://go.dev/dl/) 1.25+
+
 ```bash
 sudo apt install libayatana-appindicator3-dev
 ```
