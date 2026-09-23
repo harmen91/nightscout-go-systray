@@ -79,4 +79,4 @@ Terminal=false
 
 ## Appendix: Screenshot
 
-<img src="./screenshots/screenshot_dropdown.png">
+<img src="./screenshots/screenshot_dropdownmenu.png">
