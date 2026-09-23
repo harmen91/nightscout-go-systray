@@ -154,6 +154,7 @@ var (
 	previousBg  *systray.MenuItem
 	showBg      bool
 	showTimeAgo = true
+	showMgdl	= false
 )
 
 func main() {
@@ -207,6 +208,7 @@ func main() {
 		addAlertSettings(db)
 		showCurrent := systray.AddMenuItemCheckbox("Show current value", "", showBg)
 		showTimeAgo_item := systray.AddMenuItemCheckbox("Show time ago", "", showTimeAgo)
+		showMgdl_item := systray.AddMenuItemCheckbox("Show as mg/dL", "", showMgdl)
 		quit := systray.AddMenuItem("Quit", "")
 		go func() {
 			for {
@@ -214,6 +216,14 @@ func main() {
 				case <-open.ClickedCh:
 					exec.Command("xdg-open", *args.Url).Start()
 				case <-refresh.ClickedCh:
+					setBg()
+				case <-showMgdl_item.ClickedCh:
+					showMgdl = !showMgdl
+					if showMgdl {
+						showMgdl_item.Check()
+					} else {
+						showMgdl_item.Uncheck()
+					}
 					setBg()
 				case <-showCurrent.ClickedCh:
 					toggleShowCurrent(showCurrent, db)
@@ -266,11 +276,17 @@ func (b *bg) alert() {
 }
 
 func (b *bg) format() string {
+    value := b.Value.Value
+    format := "%.1f"
+    if showMgdl {
+        value = b.Value.Value * mgdltommol
+        format = "%.0f"
+    }
     if showTimeAgo {
         mins := int(time.Now().UnixMilli()-b.Value.Timestamp) / 60000
-        return fmt.Sprintf("%.1f %s %dm ago", b.Value.Value, b.Direction.Value, mins)
+        return fmt.Sprintf(format+" %s %dm ago", value, b.Direction.Value, mins)
     }
-    return fmt.Sprintf("%.1f %s", b.Value.Value, b.Direction.Value)
+    return fmt.Sprintf(format+" %s", value, b.Direction.Value)
 }
 
 func (b *bg) getAlerts() (alerts []string) {
