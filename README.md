@@ -42,8 +42,9 @@ Example:
 cgm -url https://your-nightscout-url.com
 ```
 
-```
 Usage of cgm:
+
+```
   -url string
         Your nightscout url e.g. https://example.herokuapp.com
   -high float
@@ -76,6 +77,6 @@ Exec=/home/username/.local/bin/cgm -url https://your-nightscout-url.com
 Terminal=false
 ```
 
-## Screenshot menu dropdown
+## Appendix: Screenshot
 
 <img src="./screenshots/screenshot_2.png">
