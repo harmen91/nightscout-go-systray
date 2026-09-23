@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -12,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
@@ -220,10 +220,12 @@ func main() {
 				}
 			}
 		}()
-		setBg()
-		for range time.Tick(time.Minute * 1) {
+		go func() {
 			setBg()
-		}
+			for range time.Tick(time.Minute * 1) {
+				setBg()
+			}
+		}()
 	}, func() {})
 }
 
@@ -311,26 +313,47 @@ func (b *bg) getAlerts() (alerts []string) {
 }
 
 func (b *bg) getBg() string {
-	url := *args.Url + "/api/v1/entries?count=1"
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Println(err)
+	url := strings.TrimRight(*args.Url, "/") + "/api/v1/entries.json?count=2"
+	type fetchResult struct {
+		body []byte
+		err  error
 	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
+	ch := make(chan fetchResult, 1)
+	go func() {
+		client := &http.Client{Timeout: 15 * time.Second}
+		resp, err := client.Get(url)
+		if err != nil {
+			ch <- fetchResult{nil, err}
+			return
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		ch <- fetchResult{body, err}
+	}()
+	var body []byte
+	select {
+	case r := <-ch:
+		if r.err != nil {
+			log.Println("fetch error:", r.err)
+			return ""
+		}
+		body = r.body
+	case <-time.After(20 * time.Second):
+		log.Println("fetch timeout")
+		return ""
 	}
-	stringBody := strings.Split(string(body), "\t")
-	timestamp, err := strconv.ParseInt(stringBody[1], 10, 64)
-	if err != nil {
-		log.Println(err)
+	var entries []struct {
+		Date      int64  `json:"date"`
+		Sgv       int    `json:"sgv"`
+		Direction string `json:"direction"`
 	}
-	mgdl, err := strconv.Atoi(stringBody[2])
-	if err != nil {
-		log.Println(err)
+	if err := json.Unmarshal(body, &entries); err != nil || len(entries) == 0 {
+		log.Printf("failed to parse entries: %v", err)
+		return ""
 	}
-	direction := strings.ReplaceAll(stringBody[3], "\"", "")
+	timestamp := entries[0].Date
+	mgdl := entries[0].Sgv
+	direction := entries[0].Direction
 	_, ok := directions[direction]
 	if !ok {
 		direction = fallbackDirection
